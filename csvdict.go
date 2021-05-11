@@ -78,15 +78,15 @@ func NewWriterFromPath(path string, fieldnames []string) (*Writer, error) {
 	return NewWriter(fh, fieldnames)
 }
 
-func (dw Writer) WriteHeader() {
-	dw.Writer.Write(dw.Fieldnames)
-	dw.Writer.Flush()
+func (dw Writer) WriteHeader() error {
+
+	return dw.Writer.Write(dw.Fieldnames)
 }
 
 // to do - check flags for whether or not to be liberal when missing keys
 // (20160516/thisisaaronland)
 
-func (dw Writer) WriteRow(row map[string]string) {
+func (dw Writer) WriteRow(row map[string]string) error {
 
 	out := make([]string, 0)
 
@@ -101,6 +101,16 @@ func (dw Writer) WriteRow(row map[string]string) {
 		out = append(out, v)
 	}
 
-	dw.Writer.Write(out)
-	dw.Writer.Flush() // move me somewhere more sensible
+	return dw.Writer.Write(out)
+}
+
+// Flush writes any buffered data to the underlying writer. To check if an error occurred during the Flush, call Error.
+func (dw Writer) Flush() error {
+	dw.Writer.Flush()
+	return nil
+}
+
+// Error reports any error that has occurred during a previous Write or Flush.
+func (dw Writer) Error() error {
+	return dw.Writer.Error()
 }
