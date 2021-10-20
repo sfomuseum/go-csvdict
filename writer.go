@@ -13,7 +13,7 @@ type Writer struct {
 	Fieldnames []string
 }
 
-
+// NewWriter will return a new Writer that writes to wr using a set list of column names defined in fieldnames.
 func NewWriter(wr io.Writer, fieldnames []string) (*Writer, error) {
 
 	writer := csv.NewWriter(wr)
@@ -22,6 +22,7 @@ func NewWriter(wr io.Writer, fieldnames []string) (*Writer, error) {
 	return &dw, nil
 }
 
+// NewWriter will return a new Writer that writes to path using a set list of column names defined in fieldnames.
 func NewWriterFromPath(path string, fieldnames []string) (*Writer, error) {
 
 	fh, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -33,14 +34,16 @@ func NewWriterFromPath(path string, fieldnames []string) (*Writer, error) {
 	return NewWriter(fh, fieldnames)
 }
 
+// WriteHeader will write the CSV-encoded list of fieldnames passed to dw.
 func (dw Writer) WriteHeader() error {
-
 	return dw.Writer.Write(dw.Fieldnames)
 }
 
 // to do - check flags for whether or not to be liberal when missing keys
 // (20160516/thisisaaronland)
 
+// WriteRow writes the values of row as CSV-encoded data. The order of those values is determined
+// by their position defined in the list of fieldnames passed to dw.
 func (dw Writer) WriteRow(row map[string]string) error {
 
 	out := make([]string, 0)

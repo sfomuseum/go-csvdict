@@ -40,6 +40,8 @@ func NewReaderFromPath(path string) (*Reader, error) {
 	return NewReader(fh)
 }
 
+// Read reads one record (a slice of fields) from r and returns a map[string]string
+// mapping columns to their corresponding names, as defined in the first line of r.
 func (dr Reader) Read() (map[string]string, error) {
 
 	row, err := dr.Reader.Read()
