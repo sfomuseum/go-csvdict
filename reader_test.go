@@ -2,7 +2,6 @@ package csvdict
 
 import (
 	"bufio"
-	"io"
 	"os"
 	"testing"
 )
@@ -46,12 +45,7 @@ func TestReader(t *testing.T) {
 
 	count_rows := 0
 
-	for {
-		row, err := csv_r.Read()
-
-		if err == io.EOF {
-			break
-		}
+	for row, err := range csv_r.Read() {
 
 		if err != nil {
 			t.Fatalf("Failed to read row, %v", err)

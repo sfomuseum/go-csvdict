@@ -42,12 +42,7 @@ func TestWriter(t *testing.T) {
 
 	rows := make([]map[string]string, 0)
 
-	for {
-		row, err := csv_r.Read()
-
-		if err == io.EOF {
-			break
-		}
+	for row, err := range csv_r.Read() {
 
 		if err != nil {
 			t.Fatalf("Failed to read row, %v", err)
