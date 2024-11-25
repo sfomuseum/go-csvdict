@@ -6,6 +6,7 @@ import (
 	"io"
 	"iter"
 	"os"
+	"path/filepath"
 )
 
 // type Reader implements a `encoding/csv` style reader for CSV documents with named columns.
@@ -17,7 +18,13 @@ type Reader struct {
 // NewReader will return a Reader instance that will load data from 'path'
 func NewReaderFromPath(path string) (*Reader, error) {
 
-	r, err := os.Open(path)
+	abs_path, err := filepath.Abs(path)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive absolute path for %s, %w", path, err)
+	}
+
+	r, err := os.Open(abs_path)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to open %s, %w", path, err)
@@ -47,30 +54,36 @@ func NewReader(io_r io.Reader) (*Reader, error) {
 
 // Read reads one record (a slice of fields) from r and returns a map[string]string
 // mapping columns to their corresponding names, as defined in the first line of r.
-// func (r Reader) Read() (map[string]string, error) {}
+func (r Reader) Read() (map[string]string, error) {
 
-func (r Reader) Read() iter.Seq2[map[string]string, error] {
+	row, err := r.csv_reader.Read()
+
+	if err != nil {
+		return nil, err
+	}
+
+	dict := make(map[string]string)
+
+	for i, value := range row {
+		key := r.fieldnames[i]
+		dict[key] = value
+	}
+
+	return dict, nil
+}
+
+// Iterate throush all from r and yielding a map[string]string mapping columns to their corresponding
+// names, as defined in the first line of r.
+func (r Reader) Iterate() iter.Seq2[map[string]string, error] {
 
 	return func(yield func(map[string]string, error) bool) {
 
 		for {
 
-			row, err := r.csv_reader.Read()
+			dict, err := r.Read()
 
 			if err == io.EOF {
 				break
-			}
-
-			if err != nil {
-				yield(nil, fmt.Errorf("Failed to read row, %w", err))
-				return
-			}
-
-			dict := make(map[string]string)
-
-			for i, value := range row {
-				key := r.fieldnames[i]
-				dict[key] = value
 			}
 
 			yield(dict, nil)

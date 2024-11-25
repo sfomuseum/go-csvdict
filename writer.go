@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
 	"sync"
 )
@@ -34,7 +35,13 @@ func NewWriter(wr io.Writer) (*Writer, error) {
 // NewWriter will return a new Writer that writes to 'path'.
 func NewWriterFromPath(path string) (*Writer, error) {
 
-	wr, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	abs_path, err := filepath.Abs(path)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive absolute path for %s, %w", path, err)
+	}
+
+	wr, err := os.OpenFile(abs_path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to open %s for writing, %w", path, err)
@@ -44,7 +51,8 @@ func NewWriterFromPath(path string) (*Writer, error) {
 }
 
 // WriteRow writes the values of row as CSV-encoded data. The order of those values is determined
-// by their position defined in the list of keys in 'row' which are sorted alphabetically.
+// by their position defined in the list of keys in 'row' which are sorted alphabetically. WriteRow
+// is thread-safe.
 func (dw *Writer) WriteRow(row map[string]string) error {
 
 	dw.mu.Lock()
