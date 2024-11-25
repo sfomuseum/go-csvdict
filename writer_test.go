@@ -6,7 +6,6 @@ import (
 	_ "fmt"
 	"io"
 	"os"
-	"sort"
 	"testing"
 )
 
@@ -42,12 +41,7 @@ func TestWriter(t *testing.T) {
 
 	rows := make([]map[string]string, 0)
 
-	for {
-		row, err := csv_r.Read()
-
-		if err == io.EOF {
-			break
-		}
+	for row, err := range csv_r.Iterate() {
 
 		if err != nil {
 			t.Fatalf("Failed to read row, %v", err)
@@ -59,24 +53,10 @@ func TestWriter(t *testing.T) {
 	var buf bytes.Buffer
 	wr := bufio.NewWriter(&buf)
 
-	fieldnames := make([]string, 0)
-
-	for k, _ := range rows[0] {
-		fieldnames = append(fieldnames, k)
-	}
-
-	sort.Strings(fieldnames)
-
-	csv_wr, err := NewWriter(wr, fieldnames)
+	csv_wr, err := NewWriter(wr)
 
 	if err != nil {
 		t.Fatalf("Failed to create new writer, %v", err)
-	}
-
-	err = csv_wr.WriteHeader()
-
-	if err != nil {
-		t.Fatalf("Failed to write CSV header, %v", err)
 	}
 
 	for i, row := range rows {
@@ -91,6 +71,6 @@ func TestWriter(t *testing.T) {
 	}
 
 	if !bytes.Equal(body, buf.Bytes()) {
-		t.Fatalf("Unexpected output")
+		t.Fatalf("Unexpected output: '%s'", buf.Bytes())
 	}
 }

@@ -1,3 +1,3 @@
-module github.com/sfomuseum/go-csvdict
+module github.com/sfomuseum/go-csvdict/v2
 
-go 1.13
+go 1.23

@@ -12,21 +12,18 @@ Go package to implement a "dict reader" style CSV parser (on top of the default 
 
 ```
 import (
-        "github.com/whosonfirst/go-csvdict"
 	"os"
+
+        "github.com/whosonfirst/go-csvdict/v2"
 )
 
-reader, reader_err := csvdict.NewReaderFromPath("example.csv")
+r, _ := csvdict.NewReaderFromPath("example.csv")
 
 // or maybe you might do
-// reader, err := csvdict.NewReader(os.Stdin)
-
-if err != nil {
-	panic(err)
-}
+// r, _ := csvdict.NewReader(os.Stdin)
 
 for {
-	row, err := reader.Read()
+	row, err := r.Read()
 
 	if err == io.EOF {
 		break
@@ -37,7 +34,31 @@ for {
 	}
 
 	value, ok := row["some-key"]
+	// and so on...
+}
+```
 
+It is also possible to iterate through all the records using the `Iterate` method:
+
+```
+import (
+	"os"
+
+        "github.com/whosonfirst/go-csvdict/v2"
+)
+
+r, _ := csvdict.NewReaderFromPath("example.csv")
+
+// or maybe you might do
+// r, _ := csvdict.NewReader(os.Stdin)
+
+for row, err := r.Iterate() {
+
+	if err != nil {
+		return err
+	}
+
+	value, ok := row["some-key"]
 	// and so on...
 }
 ```
@@ -46,34 +67,22 @@ for {
 
 ```
 import (
-	"github.com/whosonfirst/go-csvdict"
 	"os"
+
+	"github.com/whosonfirst/go-csvdict/v2"
 )
 
-fieldnames := []string{"foo", "bar"}
-
-writer, err := csvdict.NewWriter(os.Stdout, fieldnames)
+wr, _ := csvdict.NewWriter(os.Stdout)
 
 // or maybe you might do
-// writer, err := csvdict.NewWriterFromPath("new.csv", fieldnames)
+// wrr, _ := csvdict.NewWriterFromPath("new.csv")
 
-if err != nil {
-	panic(err)
+row := make(map[string]{
+	"foo": "hello",
+	"bar": "world",
 }
 
-writer.WriteHeader()
-
-row := make(map[string]string)
-row["foo"] = "hello"
-row["bar"] = "world"
-
-// See this? "baz" is not included in the list of fieldnames
-// above so it will be silently ignored and excluded from your
-// CSV file. Perhaps it should trigger an error. It doesn't, today...
-
-row["baz"] = "wub wub wub"
-
-writer.WriteRow(row)
+wr.WriteRow(row)
 ```
 
 ## See also
