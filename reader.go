@@ -86,7 +86,9 @@ func (r Reader) Iterate() iter.Seq2[map[string]string, error] {
 				break
 			}
 
-			yield(dict, nil)
+			if !yield(dict, nil) {
+				return
+			}
 		}
 	}
 }
