@@ -52,7 +52,7 @@ r, _ := csvdict.NewReaderFromPath("example.csv")
 // or maybe you might do
 // r, _ := csvdict.NewReader(os.Stdin)
 
-for row, err := r.Iterate() {
+for row, err := range r.Iterate() {
 
 	if err != nil {
 		return err
